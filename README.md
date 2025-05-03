@@ -1,66 +1,54 @@
-## Foundry
+# RebaseToken
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+A dynamic ERC20 token with automatic rebasing functionality, where balances grow over time based on a per-second interest rate.
 
-Foundry consists of:
+## 📜 Overview
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+**RebaseToken** is an ERC20-compliant token that increases user balances automatically over time using a linear interest model. This interest rate is applied per second and affects each user's balance based on their last interaction with the contract.
 
-## Documentation
+## ✨ Features
 
-https://book.getfoundry.sh/
+- 📈 **Auto-Rebasing**: Balances increase over time without requiring user action.
+- ⏱️ **Per-Second Interest**: Global interest rate applied linearly per second.
+- 🔒 **Interest Rate Only Increases**: Cannot be decreased, ensuring forward-only growth.
+- 👤 **User-Specific Accrual**: Each user accrues interest individually from their last interaction.
 
-## Usage
-
-### Build
-
-```shell
-$ forge build
-```
-
-### Test
-
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
+## 🛠️ Usage
 
 ### Deploy
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+The contract uses Solidity `^0.8.28` and requires OpenZeppelin's ERC20 dependency:
+
+```bash
+npm install @openzeppelin/contracts
 ```
 
-### Cast
+### Key Functions
 
-```shell
-$ cast <subcommand>
+```solidity
+setInterestRate(uint256 newRate)
 ```
 
-### Help
+- Set a new global interest rate (must be >= current rate).
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
+```solidity
+mint(address to, uint256 amount)
 ```
+
+- Mint new principal tokens to a user, after accruing interest.
+
+```solidity
+balanceOf(address user) → uint256
+```
+
+- Returns the dynamically calculated balance including accrued interest.
+
+```solidity
+getUserInterestRate(address user) → uint256
+```
+
+- Returns the interest rate assigned to a specific user.
+
+## 📄 License
+
+MIT © Fahmi Lukistriya
