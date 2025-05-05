@@ -86,10 +86,11 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
      * @notice Mints new principal tokens to user's account
      * @param _to address to mint
      * @param _amount amount principal token to mint
+     * @param _userInterestRate user interest rate
      */
-    function mint(address _to, uint256 _amount) external onlyRole(MINT_AND_BURN_ROLE) {
+    function mint(address _to, uint256 _amount, uint256 _userInterestRate) external onlyRole(MINT_AND_BURN_ROLE) {
         _mintAccruedInterest(_to);
-        s_userInterestRate[_to] = s_interestRate;
+        s_userInterestRate[_to] = _userInterestRate;
 
         _mint(_to, _amount);
     }
@@ -100,9 +101,6 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
      * @param _amount amount principal token to burn
      */
     function burn(address _from, uint256 _amount) external onlyRole(MINT_AND_BURN_ROLE) {
-        if (_amount == type(uint256).max) {
-            _amount = balanceOf(_from);
-        }
         _mintAccruedInterest(_from);
         _burn(_from, _amount);
     }
@@ -237,19 +235,9 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
     function _mintAccruedInterest(address _user) internal {
         // Get principal balance using super balanceOf
         uint256 principalBalance = super.balanceOf(_user);
-        // if zero then return 0
-        if (principalBalance == 0) {
-            // still need to update timestamp if have rate assigned
-            if (s_userLastUpdateAtTimestamp[_user] > 0) {
-                s_userLastUpdateAtTimestamp[_user] = block.timestamp;
-            }
-            return;
-        }
-
         uint256 totalBalanceWithInterest = balanceOf(_user);
         uint256 interestToMint = totalBalanceWithInterest - principalBalance;
-        // if interesetToMint more than zero then mint it
-        if (interestToMint > 0) _mint(_user, interestToMint);
+        _mint(_user, interestToMint);
         s_userLastUpdateAtTimestamp[_user] = block.timestamp;
     }
 }
